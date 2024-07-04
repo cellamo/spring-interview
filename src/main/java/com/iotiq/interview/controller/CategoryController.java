@@ -26,8 +26,7 @@ public class CategoryController {
         return categoryService
                 .getAll()
                 .stream()
-                .map(CategoryResponse::of)
-                .toList();
+                .map(CategoryResponse::of);
     }
 
     @PostMapping
