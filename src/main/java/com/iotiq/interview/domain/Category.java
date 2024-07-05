@@ -1,7 +1,7 @@
 package com.iotiq.interview.domain;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.jpa.domain.AbstractPersistable;
@@ -15,6 +15,6 @@ public class Category extends AbstractPersistable<UUID> {
 
     String name;
 
-    @ManyToOne
+    @OneToMany
     Menu menu;
 }
