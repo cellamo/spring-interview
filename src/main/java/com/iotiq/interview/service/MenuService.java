@@ -2,12 +2,15 @@ package com.iotiq.interview.service;
 
 import com.iotiq.interview.controller.messages.MenuRequest;
 import com.iotiq.interview.domain.Menu;
+import com.iotiq.interview.exception.MenuNotFoundException;
 import com.iotiq.interview.repository.MenuRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -24,5 +27,14 @@ public class MenuService {
 
     public List<Menu> getAll() {
         return menuRepository.findAll();
+    }
+
+    public Menu getById(UUID id) {
+        Optional<Menu> byId = menuRepository.findById(id);
+        if(byId.isPresent()) {
+            return byId.get();
+        } else {
+            throw new MenuNotFoundException();
+        }
     }
 }
