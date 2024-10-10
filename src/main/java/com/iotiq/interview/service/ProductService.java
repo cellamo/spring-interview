@@ -24,6 +24,15 @@ public class ProductService {
 
     @Transactional
     public Product create(ProductRequest request) {
+        for (ProductRequest.ProductCategoryRequest pcr : request.getProductCategories()) {
+            Category category = categoryRepository.findById(pcr.getCategoryId())
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+    
+            if (productRepository.findByNameAndProductCategories_Category_Id(request.getName(), category.getId()).isPresent()) {
+                throw new IllegalArgumentException("Product with name '" + request.getName() + "' already exists in the category");
+            }
+        }
+
         Product product = new Product();
         product.setName(request.getName());
         product = productRepository.save(product);
@@ -45,6 +54,17 @@ public class ProductService {
     @Transactional
     public Product update(UUID id, ProductRequest request) {
         Product existingProduct = getById(id);
+
+        for (ProductRequest.ProductCategoryRequest pcr : request.getProductCategories()) {
+            Category category = categoryRepository.findById(pcr.getCategoryId())
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+    
+            if (!existingProduct.getName().equals(request.getName()) &&
+                productRepository.findByNameAndProductCategories_Category_Id(request.getName(), category.getId()).isPresent()) {
+                throw new IllegalArgumentException("Product with name '" + request.getName() + "' already exists in the category");
+            }
+        }
+        
         existingProduct.setName(request.getName());
     
         // Remove existing product categories

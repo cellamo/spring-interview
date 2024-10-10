@@ -3,6 +3,8 @@ package com.iotiq.interview.service;
 import com.iotiq.interview.controller.messages.CategoryRequest;
 import com.iotiq.interview.domain.Category;
 import com.iotiq.interview.domain.Menu;
+import com.iotiq.interview.domain.Product;
+import com.iotiq.interview.domain.ProductCategory;
 import com.iotiq.interview.exception.MenuNotFoundException;
 import com.iotiq.interview.repository.CategoryRepository;
 import com.iotiq.interview.repository.MenuRepository;
@@ -15,6 +17,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;

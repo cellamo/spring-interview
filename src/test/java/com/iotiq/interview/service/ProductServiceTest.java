@@ -78,9 +78,8 @@ class ProductServiceTest {
     void testGetAllProducts() {
         // Arrange
         List<Product> products = Arrays.asList(
-            new Product(),
-            new Product()
-        );
+                new Product(),
+                new Product());
         when(productRepository.findAll()).thenReturn(products);
 
         // Act
@@ -148,6 +147,33 @@ class ProductServiceTest {
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Test
+    void testCreateProductWithDuplicateNameInCategory() {
+        // Arrange
+        ProductRequest request = new ProductRequest();
+        request.setName("Tavuk");
+        Set<ProductRequest.ProductCategoryRequest> productCategories = new HashSet<>();
+        ProductRequest.ProductCategoryRequest pcr = new ProductRequest.ProductCategoryRequest();
+        UUID categoryId = UUID.randomUUID();
+        pcr.setCategoryId(categoryId);
+        pcr.setPrice(BigDecimal.valueOf(21.21));
+        productCategories.add(pcr);
+        request.setProductCategories(productCategories);
+
+        Category category = new Category();
+        setEntityId(category, categoryId);
+
+        Product existingProduct = new Product();
+        existingProduct.setName("Tavuk");
+
+        when(categoryRepository.findById(any(UUID.class))).thenReturn(Optional.of(category));
+        when(productRepository.findByNameAndProductCategories_Category_Id("Tavuk", categoryId)).thenReturn(Optional.of(existingProduct));
+
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class, () -> productService.create(request));
+        verify(productRepository, never()).save(any(Product.class));
     }
 
 }
