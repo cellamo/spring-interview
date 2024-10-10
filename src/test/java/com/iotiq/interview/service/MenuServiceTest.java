@@ -8,7 +8,11 @@ import com.iotiq.interview.repository.MenuRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -98,20 +102,34 @@ class MenuServiceTest {
     @Test
     void testGetFilteredMenus() {
         // Arrange
-        Menu menu1 = new Menu();
-        menu1.setName("Italian Menu");
-        Menu menu2 = new Menu();
-        menu2.setName("French Menu");
-
-        when(menuRepository.findAllByNameContainingIgnoreCase("Italian")).thenReturn(Collections.singletonList(menu1));
+        String name = "Italian";
+        Pageable pageable = PageRequest.of(0, 10);
+        List<Menu> menus = Collections.singletonList(new Menu());
+        Page<Menu> menuPage = new PageImpl<>(menus, pageable, menus.size());
+        when(menuRepository.findAllByNameContainingIgnoreCase(name, pageable)).thenReturn(menuPage);
 
         // Act
-        List<Menu> result = menuService.getFiltered("Italian");
+        Page<Menu> result = menuService.getFiltered(name, pageable);
 
         // Assert
-        assertEquals(1, result.size());
-        assertEquals("Italian Menu", result.get(0).getName());
-        verify(menuRepository, times(1)).findAllByNameContainingIgnoreCase("Italian");
+        assertEquals(1, result.getContent().size());
+        verify(menuRepository, times(1)).findAllByNameContainingIgnoreCase(name, pageable);
+    }
+
+    @Test
+    void testGetAllMenusPaginated() {
+        // Arrange
+        Pageable pageable = PageRequest.of(0, 10);
+        List<Menu> menus = Arrays.asList(new Menu(), new Menu());
+        Page<Menu> menuPage = new PageImpl<>(menus, pageable, menus.size());
+        when(menuRepository.findAll(pageable)).thenReturn(menuPage);
+
+        // Act
+        Page<Menu> result = menuService.getFiltered(null, pageable);
+
+        // Assert
+        assertEquals(2, result.getContent().size());
+        verify(menuRepository, times(1)).findAll(pageable);
     }
 
     @Test

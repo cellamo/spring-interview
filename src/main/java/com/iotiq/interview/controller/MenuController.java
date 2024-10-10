@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.UUID;
@@ -28,11 +30,9 @@ public class MenuController {
 
     private final MenuService menuService;
     @GetMapping
-    public List<MenuResponse> getAll(@RequestParam(required = false) String name) {
-        return menuService.getFiltered(name)
-                .stream()
-                .map(MenuResponse::of)
-                .toList();
+    public Page<MenuResponse> getAll(@RequestParam(required = false) String name, Pageable pageable) {
+        return menuService.getFiltered(name, pageable)
+                .map(MenuResponse::of);
     }
 
     @PutMapping("/{id}")

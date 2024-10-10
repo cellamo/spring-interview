@@ -11,7 +11,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -45,16 +51,17 @@ class MenuControllerTest {
         Menu menu2 = new Menu();
         menu2.setName("Menu 2");
         List<Menu> menus = Arrays.asList(menu1, menu2);
-        when(menuService.getFiltered(null)).thenReturn(menus);
-
+        Page<Menu> menuPage = new PageImpl<>(menus, PageRequest.of(0, 10), menus.size());
+        when(menuService.getFiltered(null, PageRequest.of(0, 10))).thenReturn(menuPage);
+    
         // Act
-        List<MenuResponse> result = menuController.getAll(null);
-
+        Page<MenuResponse> result = menuController.getAll(null, PageRequest.of(0, 10));
+    
         // Assert
-        assertEquals(2, result.size());
-        assertEquals("Menu 1", result.get(0).getName());
-        assertEquals("Menu 2", result.get(1).getName());
-        verify(menuService, times(1)).getFiltered(null);
+        assertEquals(2, result.getContent().size());
+        assertEquals("Menu 1", result.getContent().get(0).getName());
+        assertEquals("Menu 2", result.getContent().get(1).getName());
+        verify(menuService, times(1)).getFiltered(null, PageRequest.of(0, 10));
     }
 
     @Test
@@ -101,23 +108,22 @@ class MenuControllerTest {
     }
 
     @Test
-    void testGetAllWithFilter() {
+    void testGetAllMenusWithFilter() {
         // Arrange
-        Menu menu1 = new Menu();
-        menu1.setName("Italian Menu");
-        List<Menu> menus = Collections.singletonList(menu1);
-        when(menuService.getFiltered("Italian")).thenReturn(menus);
+        String name = "Italian";
+        Pageable pageable = PageRequest.of(0, 10);
+        List<Menu> menus = Collections.singletonList(new Menu());
+        Page<Menu> menuPage = new PageImpl<>(menus, pageable, menus.size());
+        when(menuService.getFiltered(name, pageable)).thenReturn(menuPage);
 
         // Act
-        List<MenuResponse> result = menuController.getAll("Italian");
+        Page<MenuResponse> result = menuController.getAll(name, pageable);
 
         // Assert
-        assertEquals(1, result.size());
-        assertEquals("Italian Menu", result.get(0).getName());
-        verify(menuService, times(1)).getFiltered("Italian");
+        assertEquals(1, result.getContent().size());
+        verify(menuService, times(1)).getFiltered(name, pageable);
     }
 
-    // Add this test method
     @Test
     void testCreate_DuplicateName() {
         // Arrange

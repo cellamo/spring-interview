@@ -7,6 +7,8 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Page;
 
 import com.iotiq.interview.controller.CategoryController;
 import com.iotiq.interview.controller.MenuController;
@@ -30,8 +32,9 @@ class InterviewApplicationTests {
 
 	@Test
 	void testMenuFilteringIntegration() {
-		List<MenuResponse> italianMenus = menuController.getAll("Italian");
+		Page<MenuResponse> italianMenus = menuController.getAll("Italian", PageRequest.of(0, 10));
 		assertNotNull(italianMenus);
+		assertNotNull(italianMenus.getContent());
 	}
 
 	@Test

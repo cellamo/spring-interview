@@ -45,13 +45,16 @@ public class MenuControllerIntegrationTest {
         Menu menu2 = new Menu();
         menu2.setName("French Menu");
         menuRepository.saveAll(Arrays.asList(menu1, menu2));
-
+    
         // Act & Assert
         mockMvc.perform(get("/api/v1/menus?name=Italian"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].name", is("Italian Menu")));
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content", hasSize(1)))
+            .andExpect(jsonPath("$.content[0].name", is("Italian Menu")))
+            .andExpect(jsonPath("$.totalElements", is(1)))
+            .andExpect(jsonPath("$.totalPages", is(1)));
     }
+    
 
     @Test
     void testCreateMenuWithDuplicateName() throws Exception {
@@ -68,5 +71,23 @@ public class MenuControllerIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(new ObjectMapper().writeValueAsString(newMenu)))
                 .andExpect(status().isConflict());
+    }
+
+    @Test
+    void testGetAllMenusWithFilterPaginated() throws Exception {
+        // Arrange
+        Menu menu1 = new Menu();
+        menu1.setName("Italian Menu");
+        Menu menu2 = new Menu();
+        menu2.setName("French Menu");
+        menuRepository.saveAll(Arrays.asList(menu1, menu2));
+
+        // Act & Assert
+        mockMvc.perform(get("/api/v1/menus?name=Italian&page=0&size=10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].name", is("Italian Menu")))
+                .andExpect(jsonPath("$.totalElements", is(1)))
+                .andExpect(jsonPath("$.totalPages", is(1)));
     }
 }
