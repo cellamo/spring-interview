@@ -1,10 +1,9 @@
 package com.iotiq.interview.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 import java.util.HashSet;
@@ -14,13 +13,11 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
-public class Category extends AbstractPersistable<UUID> {
+public class Product extends AbstractPersistable<UUID> {
+    
+    @Column(nullable = false)
+    private String name;
 
-    String name;
-
-    @ManyToOne
-    Menu menu;
-
-    @OneToMany(mappedBy = "category")
+    @OneToMany(mappedBy = "product")
     private Set<ProductCategory> productCategories = new HashSet<>();
 }

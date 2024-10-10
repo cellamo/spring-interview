@@ -50,6 +50,7 @@ public class MenuService {
             throw new MenuNotFoundException();
         }
     }
+
     public List<Menu> getFiltered(String name) {
         if (name != null && !name.isEmpty()) {
             return menuRepository.findAllByNameContainingIgnoreCase(name);
