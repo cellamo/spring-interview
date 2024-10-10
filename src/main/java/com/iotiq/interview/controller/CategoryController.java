@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @RestController
@@ -26,7 +27,8 @@ public class CategoryController {
         return categoryService
                 .getAll()
                 .stream()
-                .map(CategoryResponse::of);
+                .map(CategoryResponse::of)
+                .collect(Collectors.toList());
     }
 
     @PostMapping

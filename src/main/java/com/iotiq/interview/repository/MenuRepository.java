@@ -7,5 +7,5 @@ import java.util.List;
 import java.util.UUID;
 
 public interface MenuRepository extends JpaRepository<Menu, UUID> {
-    List<Menu> findAllByCategory(String name);
+    List<Menu> findAllByCategoriesName(String name);
 }

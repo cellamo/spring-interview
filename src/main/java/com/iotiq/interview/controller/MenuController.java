@@ -36,6 +36,6 @@ public class MenuController {
     @ResponseStatus(HttpStatus.CREATED)
     public CreateResponse create(@Valid @RequestBody MenuRequest request) {
         Menu menu = menuService.create(request);
-        return menu.id;
+        return CreateResponse.builder().id(menu.getId()).build();
     }
 }

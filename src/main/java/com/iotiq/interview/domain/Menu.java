@@ -17,7 +17,7 @@ public class Menu extends AbstractPersistable<UUID> {
 
     String name;
 
-    @OneToMany
+    @OneToMany(mappedBy = "menu")
     List<Category> categories = new ArrayList<>();
 
 }
