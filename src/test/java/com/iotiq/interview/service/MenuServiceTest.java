@@ -93,4 +93,22 @@ class MenuServiceTest {
         }
     }
 
+    @Test
+    void testGetFilteredMenus() {
+        // Arrange
+        Menu menu1 = new Menu();
+        menu1.setName("Italian Menu");
+        Menu menu2 = new Menu();
+        menu2.setName("French Menu");
+
+        when(menuRepository.findAllByNameContainingIgnoreCase("Italian")).thenReturn(Collections.singletonList(menu1));
+
+        // Act
+        List<Menu> result = menuService.getFiltered("Italian");
+
+        // Assert
+        assertEquals(1, result.size());
+        assertEquals("Italian Menu", result.get(0).getName());
+        verify(menuRepository, times(1)).findAllByNameContainingIgnoreCase("Italian");
+    }
 }

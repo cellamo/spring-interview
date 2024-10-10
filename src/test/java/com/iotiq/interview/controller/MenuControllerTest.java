@@ -14,6 +14,7 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -94,4 +95,22 @@ class MenuControllerTest {
             throw new RuntimeException(e);
         }
     }
+
+    @Test
+void testGetAllWithFilter() {
+    // Arrange
+    Menu menu1 = new Menu();
+    menu1.setName("Italian Menu");
+    List<Menu> menus = Collections.singletonList(menu1);
+    when(menuService.getFiltered("Italian")).thenReturn(menus);
+
+    // Act
+    List<MenuResponse> result = menuController.getAll("Italian");
+
+    // Assert
+    assertEquals(1, result.size());
+    assertEquals("Italian Menu", result.get(0).getName());
+    verify(menuService, times(1)).getFiltered("Italian");
+}
+
 }

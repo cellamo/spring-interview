@@ -114,4 +114,25 @@ class CategoryServiceTest {
             throw new RuntimeException(e);
         }
     }
+
+    @Test
+    void testGetFilteredCategories() {
+        // Arrange
+        Category category1 = new Category();
+        category1.setName("Desserts");
+        Category category2 = new Category();
+        category2.setName("Main Course");
+
+        when(categoryRepository.findAllByNameContainingIgnoreCase("Desserts"))
+                .thenReturn(Collections.singletonList(category1));
+
+        // Act
+        List<Category> result = categoryService.getFiltered("Desserts");
+
+        // Assert
+        assertEquals(1, result.size());
+        assertEquals("Desserts", result.get(0).getName());
+        verify(categoryRepository, times(1)).findAllByNameContainingIgnoreCase("Desserts");
+    }
+
 }
