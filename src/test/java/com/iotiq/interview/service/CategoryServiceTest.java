@@ -3,6 +3,7 @@ package com.iotiq.interview.service;
 import com.iotiq.interview.controller.messages.CategoryRequest;
 import com.iotiq.interview.domain.Category;
 import com.iotiq.interview.domain.Menu;
+import com.iotiq.interview.exception.MenuNotFoundException;
 import com.iotiq.interview.repository.CategoryRepository;
 import com.iotiq.interview.repository.MenuRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -78,7 +79,7 @@ class CategoryServiceTest {
         when(menuRepository.findById(menuId)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(EntityNotFoundException.class, () -> categoryService.create(request));
+        assertThrows(MenuNotFoundException.class, () -> categoryService.create(request));
         verify(menuRepository, times(1)).findById(menuId);
         verify(categoryRepository, never()).save(any(Category.class));
     }
@@ -105,16 +106,6 @@ class CategoryServiceTest {
         verify(categoryRepository, times(1)).findAll();
     }
 
-    private void setEntityId(AbstractPersistable<UUID> entity, UUID id) {
-        try {
-            Field idField = AbstractPersistable.class.getDeclaredField("id");
-            idField.setAccessible(true);
-            idField.set(entity, id);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     @Test
     void testGetFilteredCategories() {
         // Arrange
@@ -135,4 +126,13 @@ class CategoryServiceTest {
         verify(categoryRepository, times(1)).findAllByNameContainingIgnoreCase("Desserts");
     }
 
+    private void setEntityId(AbstractPersistable<UUID> entity, UUID id) {
+        try {
+            Field idField = AbstractPersistable.class.getDeclaredField("id");
+            idField.setAccessible(true);
+            idField.set(entity, id);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
