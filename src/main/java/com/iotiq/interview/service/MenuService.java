@@ -2,6 +2,7 @@ package com.iotiq.interview.service;
 
 import com.iotiq.interview.controller.messages.MenuRequest;
 import com.iotiq.interview.domain.Menu;
+import com.iotiq.interview.exception.DuplicateMenuNameException;
 import com.iotiq.interview.exception.MenuNotFoundException;
 import com.iotiq.interview.repository.MenuRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,10 +18,22 @@ import java.util.UUID;
 public class MenuService {
 
     private final MenuRepository menuRepository;
-
     @Transactional
     public Menu create(MenuRequest request) {
+        if (menuRepository.existsByNameIgnoreCase(request.getName())) {
+            throw new DuplicateMenuNameException();
+        }
         Menu menu = new Menu();
+        menu.setName(request.getName());
+        return menuRepository.save(menu);
+    }
+    @Transactional
+    public Menu update(UUID id, MenuRequest request) {
+        Menu menu = getById(id);
+        if (!menu.getName().equalsIgnoreCase(request.getName()) && 
+            menuRepository.existsByNameIgnoreCase(request.getName())) {
+            throw new DuplicateMenuNameException();
+        }
         menu.setName(request.getName());
         return menuRepository.save(menu);
     }
@@ -44,4 +57,5 @@ public class MenuService {
         return menuRepository.findAll();
     }
     
+
 }

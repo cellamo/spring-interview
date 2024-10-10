@@ -3,9 +3,9 @@ package com.iotiq.interview.service;
 import com.iotiq.interview.controller.messages.CategoryRequest;
 import com.iotiq.interview.domain.Category;
 import com.iotiq.interview.domain.Menu;
+import com.iotiq.interview.exception.MenuNotFoundException;
 import com.iotiq.interview.repository.CategoryRepository;
 import com.iotiq.interview.repository.MenuRepository;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,7 +23,7 @@ public class CategoryService {
     public Category create(CategoryRequest request) {
         Menu menu = menuRepository
                 .findById(request.getMenuId())
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(() -> new MenuNotFoundException(request.getMenuId()));
 
         Category category = new Category();
         category.setName(request.getName());

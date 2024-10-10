@@ -2,6 +2,7 @@ package com.iotiq.interview.service;
 
 import com.iotiq.interview.controller.messages.MenuRequest;
 import com.iotiq.interview.domain.Menu;
+import com.iotiq.interview.exception.DuplicateMenuNameException;
 import com.iotiq.interview.exception.MenuNotFoundException;
 import com.iotiq.interview.repository.MenuRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,6 +15,7 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 class MenuServiceTest {
@@ -110,5 +112,40 @@ class MenuServiceTest {
         assertEquals(1, result.size());
         assertEquals("Italian Menu", result.get(0).getName());
         verify(menuRepository, times(1)).findAllByNameContainingIgnoreCase("Italian");
+    }
+
+    @Test
+    void testCreateMenu_DuplicateName() {
+        // Arrange
+        MenuRequest request = new MenuRequest();
+        request.setName("Existing Menu");
+
+        when(menuRepository.existsByNameIgnoreCase(anyString())).thenReturn(true);
+
+        // Act & Assert
+        assertThrows(DuplicateMenuNameException.class, () -> menuService.create(request));
+        verify(menuRepository, times(1)).existsByNameIgnoreCase("Existing Menu");
+        verify(menuRepository, never()).save(any(Menu.class));
+    }
+
+    @Test
+    void testUpdateMenu_DuplicateName() {
+        // Arrange
+        UUID menuId = UUID.randomUUID();
+        MenuRequest request = new MenuRequest();
+        request.setName("New Name");
+
+        Menu existingMenu = new Menu();
+        existingMenu.setName("Old Name");
+        setEntityId(existingMenu, menuId);
+
+        when(menuRepository.findById(menuId)).thenReturn(Optional.of(existingMenu));
+        when(menuRepository.existsByNameIgnoreCase(anyString())).thenReturn(true);
+
+        // Act & Assert
+        assertThrows(DuplicateMenuNameException.class, () -> menuService.update(menuId, request));
+        verify(menuRepository, times(1)).findById(menuId);
+        verify(menuRepository, times(1)).existsByNameIgnoreCase("New Name");
+        verify(menuRepository, never()).save(any(Menu.class));
     }
 }

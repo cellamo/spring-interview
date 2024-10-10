@@ -8,4 +8,5 @@ import java.util.UUID;
 
 public interface MenuRepository extends JpaRepository<Menu, UUID> {
     List<Menu> findAllByNameContainingIgnoreCase(String name);
+    boolean existsByNameIgnoreCase(String name);
 }

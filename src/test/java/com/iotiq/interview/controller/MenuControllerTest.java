@@ -4,6 +4,7 @@ import com.iotiq.interview.controller.messages.CreateResponse;
 import com.iotiq.interview.controller.messages.MenuRequest;
 import com.iotiq.interview.controller.messages.MenuResponse;
 import com.iotiq.interview.domain.Menu;
+import com.iotiq.interview.exception.DuplicateMenuNameException;
 import com.iotiq.interview.service.MenuService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +21,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 class MenuControllerTest {
@@ -44,10 +46,10 @@ class MenuControllerTest {
         menu2.setName("Menu 2");
         List<Menu> menus = Arrays.asList(menu1, menu2);
         when(menuService.getFiltered(null)).thenReturn(menus);
-    
+
         // Act
         List<MenuResponse> result = menuController.getAll(null);
-    
+
         // Assert
         assertEquals(2, result.size());
         assertEquals("Menu 1", result.get(0).getName());
@@ -73,19 +75,21 @@ class MenuControllerTest {
         assertEquals(createdMenu.getId(), response.getId());
         verify(menuService, times(1)).create(any(MenuRequest.class));
     }
+
     @Test
     void testCreate_InvalidRequest() {
         // Arrange
         MenuRequest request = new MenuRequest();
         // Name is left empty
-        when(menuService.create(any(MenuRequest.class))).thenThrow(new IllegalArgumentException("Menu name cannot be null or empty"));
-    
+        when(menuService.create(any(MenuRequest.class)))
+                .thenThrow(new IllegalArgumentException("Menu name cannot be null or empty"));
+
         // Act & Assert
         Exception exception = assertThrows(IllegalArgumentException.class, () -> menuController.create(request));
         assertEquals("Menu name cannot be null or empty", exception.getMessage());
         verify(menuService, times(1)).create(any(MenuRequest.class));
     }
-    
+
     private void setEntityId(AbstractPersistable<UUID> entity, UUID id) {
         try {
             Field idField = AbstractPersistable.class.getDeclaredField("id");
@@ -97,20 +101,52 @@ class MenuControllerTest {
     }
 
     @Test
-void testGetAllWithFilter() {
-    // Arrange
-    Menu menu1 = new Menu();
-    menu1.setName("Italian Menu");
-    List<Menu> menus = Collections.singletonList(menu1);
-    when(menuService.getFiltered("Italian")).thenReturn(menus);
+    void testGetAllWithFilter() {
+        // Arrange
+        Menu menu1 = new Menu();
+        menu1.setName("Italian Menu");
+        List<Menu> menus = Collections.singletonList(menu1);
+        when(menuService.getFiltered("Italian")).thenReturn(menus);
 
-    // Act
-    List<MenuResponse> result = menuController.getAll("Italian");
+        // Act
+        List<MenuResponse> result = menuController.getAll("Italian");
 
-    // Assert
-    assertEquals(1, result.size());
-    assertEquals("Italian Menu", result.get(0).getName());
-    verify(menuService, times(1)).getFiltered("Italian");
-}
+        // Assert
+        assertEquals(1, result.size());
+        assertEquals("Italian Menu", result.get(0).getName());
+        verify(menuService, times(1)).getFiltered("Italian");
+    }
 
+    // Add this test method
+    @Test
+    void testCreate_DuplicateName() {
+        // Arrange
+        MenuRequest request = new MenuRequest();
+        request.setName("Existing Menu");
+
+        when(menuService.create(any(MenuRequest.class)))
+                .thenThrow(new DuplicateMenuNameException("Menu with name 'Existing Menu' already exists"));
+
+        // Act & Assert
+        Exception exception = assertThrows(DuplicateMenuNameException.class, () -> menuController.create(request));
+        assertEquals("Menu with name 'Existing Menu' already exists", exception.getMessage());
+        verify(menuService, times(1)).create(any(MenuRequest.class));
+    }
+
+    @Test
+    void testUpdate_DuplicateName() {
+        // Arrange
+        UUID menuId = UUID.randomUUID();
+        MenuRequest request = new MenuRequest();
+        request.setName("Existing Menu");
+
+        when(menuService.update(eq(menuId), any(MenuRequest.class)))
+                .thenThrow(new DuplicateMenuNameException("Menu with name 'Existing Menu' already exists"));
+
+        // Act & Assert
+        Exception exception = assertThrows(DuplicateMenuNameException.class,
+                () -> menuController.update(menuId, request));
+        assertEquals("Menu with name 'Existing Menu' already exists", exception.getMessage());
+        verify(menuService, times(1)).update(eq(menuId), any(MenuRequest.class));
+    }
 }

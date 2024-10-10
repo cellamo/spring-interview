@@ -7,14 +7,18 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.iotiq.interview.controller.messages.MenuRequest;
 import com.iotiq.interview.domain.Menu;
 import com.iotiq.interview.repository.MenuRepository;
 
@@ -47,5 +51,22 @@ public class MenuControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].name", is("Italian Menu")));
+    }
+
+    @Test
+    void testCreateMenuWithDuplicateName() throws Exception {
+        // Arrange
+        Menu existingMenu = new Menu();
+        existingMenu.setName("Existing Menu");
+        menuRepository.save(existingMenu);
+
+        MenuRequest newMenu = new MenuRequest();
+        newMenu.setName("Existing Menu");
+
+        // Act & Assert
+        mockMvc.perform(post("/api/v1/menus")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().writeValueAsString(newMenu)))
+                .andExpect(status().isConflict());
     }
 }
