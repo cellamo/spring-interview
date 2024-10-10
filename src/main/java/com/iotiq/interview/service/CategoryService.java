@@ -35,4 +35,11 @@ public class CategoryService {
     public List<Category> getAll() {
         return categoryRepository.findAll();
     }
+
+    public List<Category> getFiltered(String name) {
+        if (name != null && !name.isEmpty()) {
+            return categoryRepository.findAllByNameContainingIgnoreCase(name);
+        }
+        return categoryRepository.findAll();
+    }
 }

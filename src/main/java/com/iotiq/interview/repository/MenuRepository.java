@@ -7,5 +7,5 @@ import java.util.List;
 import java.util.UUID;
 
 public interface MenuRepository extends JpaRepository<Menu, UUID> {
-    List<Menu> findAllByCategoriesName(String name);
+    List<Menu> findAllByNameContainingIgnoreCase(String name);
 }

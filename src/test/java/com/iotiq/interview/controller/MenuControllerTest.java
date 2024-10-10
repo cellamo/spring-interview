@@ -42,16 +42,16 @@ class MenuControllerTest {
         Menu menu2 = new Menu();
         menu2.setName("Menu 2");
         List<Menu> menus = Arrays.asList(menu1, menu2);
-        when(menuService.getAll()).thenReturn(menus);
-
+        when(menuService.getFiltered(null)).thenReturn(menus);
+    
         // Act
-        List<MenuResponse> result = menuController.getAll();
-
+        List<MenuResponse> result = menuController.getAll(null);
+    
         // Assert
         assertEquals(2, result.size());
         assertEquals("Menu 1", result.get(0).getName());
         assertEquals("Menu 2", result.get(1).getName());
-        verify(menuService, times(1)).getAll();
+        verify(menuService, times(1)).getFiltered(null);
     }
 
     @Test
