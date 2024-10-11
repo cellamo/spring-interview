@@ -42,9 +42,9 @@ public class ProductService {
                 .orElseThrow(() -> new RuntimeException("Category not found"));
 
             ProductCategory productCategory = new ProductCategory();
-            productCategory.setProduct(product);
             productCategory.setCategory(category);
             productCategory.setPrice(pcr.getPrice());
+            product.addProductCategory(productCategory);
             productCategoryRepository.save(productCategory);
         }
 

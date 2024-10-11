@@ -20,4 +20,9 @@ public class Product extends AbstractPersistable<UUID> {
 
     @OneToMany(mappedBy = "product")
     private Set<ProductCategory> productCategories = new HashSet<>();
+
+    public void addProductCategory(ProductCategory productCategory) {
+        this.productCategories.add(productCategory);
+        productCategory.setProduct(this);
+    }
 }
