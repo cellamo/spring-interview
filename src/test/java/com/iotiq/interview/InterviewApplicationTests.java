@@ -14,6 +14,8 @@ import com.iotiq.interview.controller.CategoryController;
 import com.iotiq.interview.controller.MenuController;
 import com.iotiq.interview.controller.messages.CategoryResponse;
 import com.iotiq.interview.controller.messages.MenuResponse;
+import com.iotiq.interview.domain.CategoryFilter;
+import com.iotiq.interview.domain.MenuFilter;
 
 @SpringBootTest
 class InterviewApplicationTests {
@@ -32,14 +34,19 @@ class InterviewApplicationTests {
 
 	@Test
 	void testMenuFilteringIntegration() {
-		Page<MenuResponse> italianMenus = menuController.getAll("Italian", PageRequest.of(0, 10));
+		MenuFilter filter = new MenuFilter();
+		filter.setName("Italian");
+		Page<MenuResponse> italianMenus = menuController.getAll(filter, PageRequest.of(0, 10));
 		assertNotNull(italianMenus);
 		assertNotNull(italianMenus.getContent());
 	}
 
 	@Test
 	void testCategoryFilteringIntegration() {
-		List<CategoryResponse> dessertCategories = categoryController.getCategories("Dessert");
+		CategoryFilter filter = new CategoryFilter();
+		filter.setName("Dessert");
+		List<CategoryResponse> dessertCategories = categoryController.getCategories(filter);
 		assertNotNull(dessertCategories);
 	}
+
 }

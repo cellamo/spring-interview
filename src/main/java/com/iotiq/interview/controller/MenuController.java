@@ -4,6 +4,7 @@ import com.iotiq.interview.controller.messages.CreateResponse;
 import com.iotiq.interview.controller.messages.MenuRequest;
 import com.iotiq.interview.controller.messages.MenuResponse;
 import com.iotiq.interview.domain.Menu;
+import com.iotiq.interview.domain.MenuFilter;
 import com.iotiq.interview.service.MenuService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -14,13 +15,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.List;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -30,8 +29,8 @@ public class MenuController {
 
     private final MenuService menuService;
     @GetMapping
-    public Page<MenuResponse> getAll(@RequestParam(required = false) String name, Pageable pageable) {
-        return menuService.getFiltered(name, pageable)
+    public Page<MenuResponse> getAll(MenuFilter filter, Pageable pageable) {
+        return menuService.getFiltered(filter, pageable)
                 .map(MenuResponse::of);
     }
 

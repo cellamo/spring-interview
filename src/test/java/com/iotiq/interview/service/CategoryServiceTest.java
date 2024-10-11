@@ -2,6 +2,7 @@ package com.iotiq.interview.service;
 
 import com.iotiq.interview.controller.messages.CategoryRequest;
 import com.iotiq.interview.domain.Category;
+import com.iotiq.interview.domain.CategoryFilter;
 import com.iotiq.interview.domain.Menu;
 import com.iotiq.interview.domain.Product;
 import com.iotiq.interview.domain.ProductCategory;
@@ -15,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -117,16 +119,19 @@ class CategoryServiceTest {
         Category category2 = new Category();
         category2.setName("Main Course");
 
-        when(categoryRepository.findAllByNameContainingIgnoreCase("Desserts"))
+        CategoryFilter filter = new CategoryFilter();
+        filter.setName("Desserts");
+
+        when(categoryRepository.findAll(any(Specification.class)))
                 .thenReturn(Collections.singletonList(category1));
 
         // Act
-        List<Category> result = categoryService.getFiltered("Desserts");
+        List<Category> result = categoryService.getFiltered(filter);
 
         // Assert
         assertEquals(1, result.size());
         assertEquals("Desserts", result.get(0).getName());
-        verify(categoryRepository, times(1)).findAllByNameContainingIgnoreCase("Desserts");
+        verify(categoryRepository, times(1)).findAll(any(Specification.class));
     }
 
     private void setEntityId(AbstractPersistable<UUID> entity, UUID id) {

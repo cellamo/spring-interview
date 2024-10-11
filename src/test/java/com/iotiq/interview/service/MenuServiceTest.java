@@ -2,6 +2,7 @@ package com.iotiq.interview.service;
 
 import com.iotiq.interview.controller.messages.MenuRequest;
 import com.iotiq.interview.domain.Menu;
+import com.iotiq.interview.domain.MenuFilter;
 import com.iotiq.interview.exception.DuplicateMenuNameException;
 import com.iotiq.interview.exception.MenuNotFoundException;
 import com.iotiq.interview.repository.MenuRepository;
@@ -11,6 +12,7 @@ import org.mockito.*;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -20,6 +22,7 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 class MenuServiceTest {
@@ -102,18 +105,19 @@ class MenuServiceTest {
     @Test
     void testGetFilteredMenus() {
         // Arrange
-        String name = "Italian";
+        MenuFilter filter = new MenuFilter();
+        filter.setName("Italian");
         Pageable pageable = PageRequest.of(0, 10);
         List<Menu> menus = Collections.singletonList(new Menu());
         Page<Menu> menuPage = new PageImpl<>(menus, pageable, menus.size());
-        when(menuRepository.findAllByNameContainingIgnoreCase(name, pageable)).thenReturn(menuPage);
+        when(menuRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(menuPage);
 
         // Act
-        Page<Menu> result = menuService.getFiltered(name, pageable);
+        Page<Menu> result = menuService.getFiltered(filter, pageable);
 
         // Assert
         assertEquals(1, result.getContent().size());
-        verify(menuRepository, times(1)).findAllByNameContainingIgnoreCase(name, pageable);
+        verify(menuRepository, times(1)).findAll(any(Specification.class), eq(pageable));
     }
 
     @Test
@@ -122,14 +126,14 @@ class MenuServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
         List<Menu> menus = Arrays.asList(new Menu(), new Menu());
         Page<Menu> menuPage = new PageImpl<>(menus, pageable, menus.size());
-        when(menuRepository.findAll(pageable)).thenReturn(menuPage);
-
+        when(menuRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(menuPage);
+    
         // Act
-        Page<Menu> result = menuService.getFiltered(null, pageable);
+        Page<Menu> result = menuService.getFiltered(new MenuFilter(), pageable);
 
         // Assert
         assertEquals(2, result.getContent().size());
-        verify(menuRepository, times(1)).findAll(pageable);
+        verify(menuRepository, times(1)).findAll(any(Specification.class), eq(pageable));
     }
 
     @Test

@@ -4,6 +4,7 @@ import com.iotiq.interview.controller.messages.CreateResponse;
 import com.iotiq.interview.controller.messages.MenuRequest;
 import com.iotiq.interview.controller.messages.MenuResponse;
 import com.iotiq.interview.domain.Menu;
+import com.iotiq.interview.domain.MenuFilter;
 import com.iotiq.interview.exception.DuplicateMenuNameException;
 import com.iotiq.interview.service.MenuService;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,10 +54,10 @@ class MenuControllerTest {
         List<Menu> menus = Arrays.asList(menu1, menu2);
         Page<Menu> menuPage = new PageImpl<>(menus, PageRequest.of(0, 10), menus.size());
         when(menuService.getFiltered(null, PageRequest.of(0, 10))).thenReturn(menuPage);
-    
+
         // Act
         Page<MenuResponse> result = menuController.getAll(null, PageRequest.of(0, 10));
-    
+
         // Assert
         assertEquals(2, result.getContent().size());
         assertEquals("Menu 1", result.getContent().get(0).getName());
@@ -110,18 +111,19 @@ class MenuControllerTest {
     @Test
     void testGetAllMenusWithFilter() {
         // Arrange
-        String name = "Italian";
+        MenuFilter filter = new MenuFilter();
+        filter.setName("Italian");
         Pageable pageable = PageRequest.of(0, 10);
         List<Menu> menus = Collections.singletonList(new Menu());
         Page<Menu> menuPage = new PageImpl<>(menus, pageable, menus.size());
-        when(menuService.getFiltered(name, pageable)).thenReturn(menuPage);
+        when(menuService.getFiltered(any(MenuFilter.class), any(Pageable.class))).thenReturn(menuPage);
 
         // Act
-        Page<MenuResponse> result = menuController.getAll(name, pageable);
+        Page<MenuResponse> result = menuController.getAll(filter, pageable);
 
         // Assert
         assertEquals(1, result.getContent().size());
-        verify(menuService, times(1)).getFiltered(name, pageable);
+        verify(menuService, times(1)).getFiltered(any(MenuFilter.class), any(Pageable.class));
     }
 
     @Test
