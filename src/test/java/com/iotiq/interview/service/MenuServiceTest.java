@@ -156,18 +156,20 @@ class MenuServiceTest {
         UUID menuId = UUID.randomUUID();
         MenuRequest request = new MenuRequest();
         request.setName("New Name");
-
+    
         Menu existingMenu = new Menu();
         existingMenu.setName("Old Name");
         setEntityId(existingMenu, menuId);
-
+    
         when(menuRepository.findById(menuId)).thenReturn(Optional.of(existingMenu));
-        when(menuRepository.existsByNameIgnoreCase(anyString())).thenReturn(true);
-
+        when(menuRepository.existsByNameIgnoreCaseAndIdNot(eq("New Name"), eq(menuId))).thenReturn(true);
+    
         // Act & Assert
         assertThrows(DuplicateMenuNameException.class, () -> menuService.update(menuId, request));
+    
         verify(menuRepository, times(1)).findById(menuId);
-        verify(menuRepository, times(1)).existsByNameIgnoreCase("New Name");
+        verify(menuRepository, times(1)).existsByNameIgnoreCaseAndIdNot("New Name", menuId);
         verify(menuRepository, never()).save(any(Menu.class));
     }
+    
 }

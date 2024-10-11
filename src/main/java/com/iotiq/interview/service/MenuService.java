@@ -36,10 +36,11 @@ public class MenuService {
     @Transactional
     public Menu update(UUID id, MenuRequest request) {
         Menu menu = getById(id);
-        if (!menu.getName().equalsIgnoreCase(request.getName()) &&
-                menuRepository.existsByNameIgnoreCase(request.getName())) {
+        
+        if (menuRepository.existsByNameIgnoreCaseAndIdNot(request.getName(), id)) {
             throw new DuplicateMenuNameException();
         }
+        
         menu.setName(request.getName());
         return menuRepository.save(menu);
     }
@@ -49,12 +50,8 @@ public class MenuService {
     }
 
     public Menu getById(UUID id) {
-        Optional<Menu> byId = menuRepository.findById(id);
-        if (byId.isPresent()) {
-            return byId.get();
-        } else {
-            throw new MenuNotFoundException();
-        }
+        return menuRepository.findById(id)
+                .orElseThrow(() -> new MenuNotFoundException(id));
     }
 
     public Page<Menu> getFiltered(MenuFilter filter, Pageable pageable) {
